@@ -20,7 +20,13 @@ func main() {
 
 	w := worker.New(c, constant.CheckBillTaskQueue, worker.Options{})
 	w.RegisterWorkflow(iw.CheckBillWorkFlow)
-	w.RegisterActivityWithOptions(ia.QueryBill, activity.RegisterOptions{})
+
+	// register activity
+	act := &ia.BillChecker{
+		Checker: &ia.CheckerStub{M: make(map[string]int)},
+	}
+
+	w.RegisterActivityWithOptions(act.QueryBill, activity.RegisterOptions{Name: "QueryBill"})
 
 	if err := w.Run(worker.InterruptCh()); err != nil {
 		log.Panicln("unable to start worker", err)

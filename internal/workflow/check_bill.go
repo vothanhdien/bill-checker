@@ -10,7 +10,14 @@ import (
 type CheckBillWFInput struct {
 	CusCode string
 }
+
+type CheckBillWFAttempt struct {
+	T time.Time
+	B bool
+}
+
 type CheckBillWFOutput struct {
+	Attempts []CheckBillWFAttempt
 }
 
 func CheckBillWorkFlow(ctx workflow.Context, in *CheckBillWFInput) (*CheckBillWFOutput, error) {
@@ -20,6 +27,13 @@ func CheckBillWorkFlow(ctx workflow.Context, in *CheckBillWFInput) (*CheckBillWF
 
 	ctx = workflow.WithActivityOptions(ctx, options)
 	var result activity.QueryResult
-	err := workflow.ExecuteActivity(ctx, activity.QueryBill, activity.QueryArgs{CusCode: in.CusCode}).Get(ctx, &result)
-	return &CheckBillWFOutput{}, err
+	err := workflow.ExecuteActivity(ctx, "QueryBill", activity.QueryArgs{CusCode: in.CusCode}).Get(ctx, &result)
+	return &CheckBillWFOutput{
+		Attempts: []CheckBillWFAttempt{
+			{
+				T: time.Now(),
+				B: result.IsHasBill,
+			},
+		},
+	}, err
 }

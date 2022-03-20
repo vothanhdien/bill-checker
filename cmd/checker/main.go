@@ -18,10 +18,13 @@ func main() {
 	defer c.Close()
 
 	options := client.StartWorkflowOptions{
-		ID:        "foo",
 		TaskQueue: constant.CheckBillTaskQueue,
 	}
-	we, err := c.ExecuteWorkflow(context.Background(), options, iw.CheckBillWorkFlow, &iw.CheckBillWFInput{CusCode: ""})
+
+	in := &iw.CheckBillWFInput{
+		CusCode: "FOO",
+	}
+	we, err := c.ExecuteWorkflow(context.Background(), options, iw.CheckBillWorkFlow, in)
 	if err != nil {
 		log.Panicln("unable to start workflow executions", err)
 	}
@@ -31,10 +34,9 @@ func main() {
 	if err != nil {
 		log.Panicln("unable to get workflow result", err)
 	}
-	printResults(out, we.GetID(), we.GetRunID())
-}
-
-func printResults(out iw.CheckBillWFOutput, workflowID, runID string) {
-	fmt.Printf("\nWorkflowID: %s RunID: %s\n", workflowID, runID)
-	fmt.Printf("\n%s\n\n", out)
+	fmt.Printf("\nWorkflowID: %s RunID: %s\n", we.GetID(), we.GetRunID())
+	fmt.Printf("\nCustomerCode:%s\n", in.CusCode)
+	for i, v := range out.Attempts {
+		fmt.Printf("%v - %v - %v\n", i, v.T, v.B)
+	}
 }
