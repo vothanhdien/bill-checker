@@ -22,7 +22,7 @@ func main() {
 	}
 
 	in := &iw.CheckBillWFInput{
-		CusCode: "FOO",
+		CusCode: "FOO_1000",
 	}
 	we, err := c.ExecuteWorkflow(context.Background(), options, iw.CheckBillWorkFlow, in)
 	if err != nil {
